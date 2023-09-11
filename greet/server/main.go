@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
 
@@ -12,16 +13,28 @@ type Server struct {
 	greetpb.GreetServiceServer
 }
 
+func (*Server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
+	fName := req.GetGreeting().GetFirstName()
+	lName := req.GetGreeting().GetLastName()
+	result := "Hello, " + fName + " " + lName
+
+	res := &greetpb.GreetResponse{
+		Result: result,
+	}
+
+	return res, nil
+}
+
 func main() {
 	lis, err := net.Listen("tcp", "0.0.0.0:50051")
 	if err != nil {
-		log.Fatal("Error setting up TCP listner: ", err)
+		log.Fatal(err)
 	}
 
 	s := grpc.NewServer()
 	greetpb.RegisterGreetServiceServer(s, &Server{})
 
 	if err := s.Serve(lis); err != nil {
-		log.Fatal("Error serving server: ", err)
+		log.Fatal(err)
 	}
 }
