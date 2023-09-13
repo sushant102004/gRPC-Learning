@@ -1,1 +1,1 @@
-#  protoc --go_out=. --go-grpc_out=. greet/greetpb/greet.proto
+#  protoc calculator.proto --go_out=plugins=grpc:.

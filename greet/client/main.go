@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 
 	"github.com/sushant102004/gRPC-Learning/greet/greetpb"
@@ -17,7 +18,11 @@ func main() {
 	defer cc.Close()
 
 	c := greetpb.NewGreetServiceClient(cc)
+	// unary(c)
+	doStream(c)
+}
 
+func unary(c greetpb.GreetServiceClient) {
 	req := &greetpb.GreetRequest{
 		Greeting: &greetpb.Greeting{
 			FirstName: "Sushant",
@@ -31,4 +36,29 @@ func main() {
 	}
 
 	fmt.Println(resp.Result)
+
+}
+
+func doStream(c greetpb.GreetServiceClient) {
+	req := &greetpb.GreetStreamRequest{
+		Greeting: &greetpb.Greeting{
+			FirstName: "Sushant",
+		},
+	}
+	res, err := c.GreetStream(context.Background(), req)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for {
+		msg, err := res.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(msg)
+	}
+
 }
